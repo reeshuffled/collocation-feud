@@ -1,0 +1,28 @@
+html {
+    font-family: sans-serif;
+}
+
+.text-center {
+    text-align: center;
+}
+
+#board {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+}
+
+#board td {
+    width: 50%;
+}
+
+#board tr, #board td, #board th {
+    border: 1px solid black;
+    padding: 1em;
+}
+
+#guessInput {
+    margin-top: 1em;
+    font-size: 1em;
+}

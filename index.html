@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <title>Collocation Feud</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+
+    <body>
+        <section class="text-center">
+            <h1 id="word">Your word is...</h1>
+
+            <h3>Your Score: <span id="score">0.00</span></h3>
+
+            <p>
+                Your goal in this game is to guess words that are associated with the word (usually appearing directly after it).<br>
+                You have ten guesses and you get points for the frequency value of the collocated word.
+            </p>
+
+            <table id="board">
+                <tr>
+                    <td></td>
+                    <td></th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <input id="guessInput" type="text" placeholder="Enter your guess" autofocus>
+
+            <p>
+                <button id="newWord">Try New Word</button>
+            </p>
+        </section>
+       
+        <script src="js/app.js"></script>
+    </body>
+</html>
