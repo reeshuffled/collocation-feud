@@ -1,0 +1,67 @@
+<html>
+    <head>
+        <title>Collocation Feud - Word List</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <style>
+            html {
+                font-family: sans-serif;
+            }
+
+            #alphaMenu li {
+                display: inline-block;
+                margin: 10px;
+                font-size: 1.5em;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div style="text-align: center">
+            <ul id="alphaMenu"></ul>
+        </div>
+
+        <ol id="wordList"></ol>
+
+        <script>
+            /**
+             * 
+             */
+            (async function() {
+                const list = document.getElementById("wordList");
+                const menu = document.getElementById("alphaMenu");
+
+                "abcdefghijklmnopqrstuvwxyz"
+                    .split("")
+                    .forEach(letter => {
+                        const li = document.createElement("li");
+                        const a = document.createElement("a");
+                        a.innerText = letter;
+                        a.href = `#${letter}`;
+
+                        a.onclick = e => {
+                            e.preventDefault();
+                        }
+
+                        li.appendChild(a);
+                        menu.appendChild(li);
+                    });
+
+                // load the collocation data
+                const response = await fetch("data.json");
+                const data = await response.json();
+
+                [...Object.keys(data)]
+                    .sort()
+                    .forEach(word => {
+                        const li = document.createElement("li");
+                        li.innerText = word;
+
+                        list.appendChild(li);
+                    });
+            })();
+
+            
+        </script>
+    </body>
+</html>

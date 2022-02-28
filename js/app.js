@@ -8,10 +8,15 @@ const newWordBtn = document.getElementById("newWord");
 const friendScoreEl = document.getElementById("friendScore");
 const scoreEl = document.getElementById("score");
 
+// the shift amount that is used for the Ceaeser Cipher to encode user guesses
+const SHIFT = 5;
+
 // keep track of user score and friend score
 let currentWord;
 let userScore = 0;
 let friendScore;
+let userGuesses = [];
+let friendGuesses;
 
 /**
  * Initalize the UI components of the game.
@@ -29,6 +34,18 @@ let friendScore;
         const urlParams = new URLSearchParams(queryString);
         const word = urlParams.get("word");
         const score = urlParams.get("score");
+        const guesses = urlParams.get("guesses");
+
+        // delete score and guesses parameter after processing
+        updateSearchParam("score", "");
+        updateSearchParam("guesses", "");
+
+        // decode friend guesses
+        if (guesses)
+        {
+            friendGuesses = decodeFriendGuesses(decodeURIComponent(guesses));
+        }
+        
 
         // if the score is a number, store it under friendScore
         if (!isNaN(score))
@@ -92,7 +109,7 @@ function displayWord(data, word, score) {
     wordEl.innerText = word;
     
     // bind the guess word function to the enter key on input element
-    bindGuess(data[word]);
+    bindGuessChecker(data[word]);
 
     // if there is a friend score in the URL, display it
     if (score && !isNaN(score))
@@ -121,7 +138,7 @@ function selectRandomWord(data) {
     wordEl.innerText = key;
 
     // bind the guess word function to the enter key on input element
-    bindGuess(data[key]);
+    bindGuessChecker(data[key]);
 
     // update the word URL search parameter for better sharing
     updateSearchParam("word", key);
@@ -131,6 +148,13 @@ function selectRandomWord(data) {
  * Share the link to the word and user score.
  */
 function share() {
+    // encode userGuesses
+    const encodedGuesses = encodeUserGuesses(userGuesses);
+
+    // update searchParams for URL
+    updateSearchParam("score", userScore);
+    updateSearchParam("guesses", encodedGuesses);
+
     // if the user is in mobile, we can use the Share API
     if (navigator.share)
     {
@@ -160,8 +184,17 @@ function updateSearchParam(param, value) {
     // create search parameters object
     const searchParams = new URLSearchParams(window.location.search);
 
-    // encode the word to be URL safe and set as URL search parameter
-    searchParams.set(param, encodeURIComponent(value));
+    // if value is blank, delete the search parameter
+    if (value == "")
+    {
+        searchParams.delete(param);
+    }
+    // update the search parameter
+    else
+    {
+        // encode the word to be URL safe and set as URL search parameter
+        searchParams.set(param, encodeURIComponent(value));
+    }
 
     // use history API to not cause page reload on URL search parameter change
     const newRelativePathQuery = window.location.pathname + "?" + searchParams.toString();
@@ -187,6 +220,9 @@ function resetGuesses() {
  * @param {String} guess
  */
 function guessWord(data, guess) {
+    // add guess to guess array
+    userGuesses.push(guess);
+
     // get the user's guess and find it was in the collocation corpus
     const hit = data.find(x => x.assoc == guess);
 
@@ -216,6 +252,12 @@ function guessWord(data, guess) {
         // if that was last guess
         if (![...board.querySelectorAll("td")].find(x => x.innerText == ""))
         {
+            // if playing against a friend, reveal their guesses
+            if (friendGuesses.length)
+            {
+                showFriendGuesses(data);
+            }
+
             // if you beat your friend score, show confetti
             if (userScore > friendScore)
             {
@@ -233,10 +275,88 @@ function guessWord(data, guess) {
 }
 
 /**
+ * Show the guesses of the friend compared to the one's that the user has done.
+ * @param {Object} data 
+ */
+function showFriendGuesses(data) {
+    // get all table cells
+    const cells = [...board.querySelectorAll("td")];
+
+    // go through all friend guesses
+    for (let i = 0; i < friendGuesses.length; i++)
+    {
+        // get the user guess for that table cell
+        const guess = friendGuesses[i];
+
+        // show friend guesses and their frequency in the color blue
+        const hit = data.find(x => x.assoc == guess);
+        if (hit)
+        {
+            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">${hit.freq}</span>`;
+        }
+        else
+        {
+            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">X</span>`;
+        }
+    }
+}
+
+/**
+ * Encode the guesses with a Caeser cipher.
+ * Credit: https://gist.github.com/EvanHahn/2587465
+ * @param {String[]} decodedGuesses 
+ * @returns {String} encodedGuesses
+ */
+function encodeUserGuesses(decodedGuesses) {
+    return decodedGuesses.map(guess => {
+        return guess
+            .split("")
+            .map(letter => {
+                // if is letter, shift by amount
+                if (letter.match(/[a-z]/i))
+                {
+                    return String.fromCharCode(((letter.charCodeAt(0) - 97 + SHIFT) % 26) + 97)
+                }
+                // otherwise, leave it be
+                else
+                {
+                    return letter;
+                }
+            })
+            .join("");
+    }).join(",");
+}
+
+/**
+ * Decode the encoded user guesses.
+ * @param {String} encodedGuesses 
+ * @returns {String[]} decodedGuesses
+ */
+function decodeFriendGuesses(encodedGuesses) {
+    return encodedGuesses.split(",")
+        .map(guess => {
+            return guess
+                .split("")
+                .map(letter => {
+                    // if is letter, shift by amount
+                    if (letter.match(/[a-z]/i))
+                    {
+                        return String.fromCharCode(((letter.charCodeAt(0) - 97 - SHIFT) % 26) + 97)
+                    }
+                    // otherwise, leave it be
+                    else
+                    {
+                        return letter;
+                    }
+            }).join("");
+        });
+}
+
+/**
  * On input keydown, do the guess checking function for that word.
  * @param {Object[]} data 
  */
-function bindGuess(data) {
+function bindGuessChecker(data) {
     inputEl.onkeydown = e => {
         // get the user guess from the input
         const guess = inputEl.value.toLowerCase();
