@@ -102,7 +102,7 @@ function selectRandomWord(data) {
 
     // update the word URL search parameter for better sharing
     updateSearchParam("word", key);
-    updateSearchParam("score", 0);
+    updateSearchParam("score", "");
 }
 
 /**
