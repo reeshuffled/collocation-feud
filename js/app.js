@@ -24,10 +24,19 @@ const scoreEl = document.getElementById("score");
  * @param {Object[]} data 
  */
 function selectRandomWord(data) {
+    // clear the guesses table
+    [...board.querySelectorAll("td")].forEach(x => x.innerText = "");
+    
+    // reset the score
+    scoreEl.innerText = "0.00";
+    
+    // get random word
     const key = Object.keys(data)[Math.floor(Math.random() * Object.keys(data).length)];
     
+    // display word to user
     wordEl.innerText = key;
 
+    // bind the guess word function to the enter key on input element
     inputEl.onkeydown = e => {
         if (e.key == "Enter")
         {
