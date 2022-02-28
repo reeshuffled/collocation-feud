@@ -10,7 +10,8 @@
         <section class="text-center">
             <h1 id="word">Your word is...</h1>
 
-            <h3>Your Score: <span id="score">0.00</span></h3>
+            <h3 style="margin-bottom: 0;">Your Score: <span id="score">0.00</span></h3>
+            <h3 style="margin-top: 5px; display: none;">Your Friend's Score: <span id="friendScore">0.00</span></h3>
 
             <p>
                 Your goal in this game is to guess words that are associated with the word (usually appearing directly before/after it).<br>
@@ -43,7 +44,9 @@
             <input id="guessInput" type="text" placeholder="Enter your guess" autofocus>
 
             <p>
-                <button id="newWord">Try New Word</button>
+                <button id="tryAgain">Try Again</button>
+                <button id="share">Share</button>
+                <button id="newWord">Get New Word</button>
             </p>
         </section>
        
