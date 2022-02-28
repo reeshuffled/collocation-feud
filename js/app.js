@@ -8,6 +8,11 @@ const newWordBtn = document.getElementById("newWord");
 const friendScoreEl = document.getElementById("friendScore");
 const scoreEl = document.getElementById("score");
 
+// keep track of user score and friend score
+let currentWord;
+let userScore = 0;
+let friendScore;
+
 /**
  * Initalize the UI components of the game.
  */
@@ -20,16 +25,23 @@ const scoreEl = document.getElementById("score");
     const queryString = window.location.search;
     if (queryString) 
     {
+        // get word and score from word
         const urlParams = new URLSearchParams(queryString);
-
         const word = urlParams.get("word");
         const score = urlParams.get("score");
 
-        // if there is a word 
-        if (word)
+        // if the score is a number, store it under friendScore
+        if (!isNaN(score))
         {
-            displayWord(data, word, score);
+            friendScore = parseFloat(score);
         }
+
+        // if the word is a valid word, play it
+        if (word && word in data)
+        {
+            displayWord(data, word, friendScore);
+        }
+        // otherwise display a random word
         else
         {
             selectRandomWord(data);
@@ -45,8 +57,25 @@ const scoreEl = document.getElementById("score");
     // bind button click actions
     tryAgainBtn.onclick = resetGuesses;
     shareBtn.onclick = share;
-    newWordBtn.onclick = () => selectRandomWord(data);
+    newWordBtn.onclick = () => getNewWord(data);
 })();
+
+/**
+ * Get a new word.
+ * @param {Object} data 
+ */
+function getNewWord(data) {
+    // reset guesses
+    resetGuesses();
+
+    // reset friendScore
+    friendScore = 0;
+    updateSearchParam("score", "");
+    friendScoreEl.parentNode.style.display = "none";
+
+    // get new random word
+    selectRandomWord(data);
+}
 
 /**
  * Display a particular word.
@@ -58,15 +87,8 @@ function displayWord(data, word, score) {
     // clear the board and score
     resetGuesses();
 
-    // if the word is not in the word list, just choose a random one
-    if (!(word in data))
-    {
-        selectRandomWord(data);
-
-        return;
-    }
-
     // display the word to user
+    currentWord = word;
     wordEl.innerText = word;
     
     // bind the guess word function to the enter key on input element
@@ -95,6 +117,7 @@ function selectRandomWord(data) {
     const key = Object.keys(data)[Math.floor(Math.random() * Object.keys(data).length)];
     
     // display word to user
+    currentWord = key;
     wordEl.innerText = key;
 
     // bind the guess word function to the enter key on input element
@@ -102,7 +125,6 @@ function selectRandomWord(data) {
 
     // update the word URL search parameter for better sharing
     updateSearchParam("word", key);
-    updateSearchParam("score", "");
 }
 
 /**
@@ -114,14 +136,16 @@ function share() {
     {
         navigator.share({
             title: "Collocation Feud",
-            text: "Play against me in Collocation Feud!",
+            text: `Play against me in Collocation Feud! The word is: ${currentWord}`,
             url: window.location.href
         });
     }
     // otherwise, we will just copy to the clipboard
     else
     {
-        navigator.clipboard.writeText(window.location.href)
+        const text = `Play against me in Collocation Feud! The word is: ${currentWord}\n${window.location.href}`;
+
+        navigator.clipboard.writeText(text)
             .then(() => alert("Share URL copied to clipboard successfully!"));
     }
 }
@@ -151,8 +175,9 @@ function resetGuesses() {
     // clear the guesses table
     [...board.querySelectorAll("td")].forEach(x => x.innerText = "");
 
-    // reset the score
-    scoreEl.innerText = "0.00";
+    // reset the user score
+    userScore = 0;
+    scoreEl.innerText = userScore.toFixed(2);
 }
 
 /**
@@ -177,7 +202,8 @@ function guessWord(data, guess) {
             `;
 
             // increase the score display
-            scoreEl.innerText = (parseFloat(scoreEl.innerText) + parseFloat(hit.freq)).toFixed(2);
+            userScore += parseFloat(hit.freq);
+            scoreEl.innerText = userScore.toFixed(2);
         }
         else
         {
@@ -187,8 +213,19 @@ function guessWord(data, guess) {
             `;
         }
 
-        // update the score parameter so it can be shared
-        updateSearchParam("score", scoreEl.innerText);
+        // if that was last guess
+        if (![...board.querySelectorAll("td")].find(x => x.innerText == ""))
+        {
+            // if you beat your friend score, show confetti
+            if (userScore > friendScore)
+            {
+                const jsConfetti = new JSConfetti();
+
+                jsConfetti.addConfetti({
+                    emojis: ["🎉", "🏆"]
+                });
+            }
+        }
     }
 
     // clear the guess input
