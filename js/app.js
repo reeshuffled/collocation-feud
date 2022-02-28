@@ -2,11 +2,14 @@
 const wordEl = document.getElementById("word");
 const inputEl = document.getElementById("guessInput");
 const boardEl = document.getElementById("board");
+const infoStatsEl = document.getElementById("info_stats");
+
+const friendScoreEl = document.getElementById("friendScore");
+const scoreEl = document.getElementById("score");
+
 const tryAgainBtn = document.getElementById("tryAgain");
 const shareBtn = document.getElementById("share");
 const newWordBtn = document.getElementById("newWord");
-const friendScoreEl = document.getElementById("friendScore");
-const scoreEl = document.getElementById("score");
 
 // the shift amount that is used for the Ceaeser Cipher to encode user guesses
 const SHIFT = 5;
@@ -45,7 +48,6 @@ let friendGuesses;
         {
             friendGuesses = decodeFriendGuesses(decodeURIComponent(guesses));
         }
-        
 
         // if the score is a number, store it under friendScore
         if (!isNaN(score))
@@ -76,6 +78,85 @@ let friendGuesses;
     shareBtn.onclick = share;
     newWordBtn.onclick = () => getNewWord(data);
 })();
+
+/**
+ * Check the word mutal information data for the user's guess and update the guess board 
+ * and/or the score.
+ * @param {Object[]} data 
+ * @param {String} guess
+ */
+ function guessWord(data, guess) {
+    // add guess to guess array
+    userGuesses.push(guess);
+
+    // get the user's guess and find it was in the collocation corpus
+    const hit = data.find(x => x.assoc == guess);
+
+    // check if the table is full or not
+    const nextEmptyCell = [...board.querySelectorAll("td")].find(x => x.innerText == "");
+    if (nextEmptyCell)
+    {
+        if (hit)
+        {
+            // show the guess and the collocation mutal information
+            nextEmptyCell.innerHTML = `
+                ${guess} <span style="float: right">${hit.info}</span>
+            `;
+
+            // increase the score display
+            userScore += parseFloat(hit.info);
+            scoreEl.innerText = userScore;
+        }
+        else
+        {
+            // show the guess with an X next to it to show the user that the guess was incorrect
+            nextEmptyCell.innerHTML = `
+                ${guess} <span style="float: right">X</span>
+            `;
+        }
+
+        // if that was last guess
+        if (![...board.querySelectorAll("td")].find(x => x.innerText == ""))
+        {
+            // show the collocation infouencies
+            showInformationStats(data);
+
+            // if playing against a friend, reveal their guesses
+            if (friendGuesses && friendGuesses.length)
+            {
+                showFriendGuesses(data);
+            }
+
+            // if you beat your friend score, show confetti
+            if (userScore > friendScore)
+            {
+                const jsConfetti = new JSConfetti();
+
+                jsConfetti.addConfetti({
+                    emojis: ["🎉", "🏆"]
+                });
+            }
+        }
+    }
+
+    // clear the guess input
+    inputEl.value = "";
+}
+
+/**
+ * Show the data about the mutual information of the word collocations.
+ * @param {Object[]} data 
+ */
+function showInformationStats(data) {
+    data
+        .sort((a, b) => b.info - a.info)
+        .forEach(x => {
+            const li = document.createElement("li");
+            li.innerText = `${x.assoc} - ${x.info}`;
+
+            infoStatsEl.appendChild(li);
+        });
+}
 
 /**
  * Get a new word.
@@ -118,7 +199,7 @@ function displayWord(data, word, score) {
         friendScoreEl.parentNode.style.display = "";
 
         // set friend score to whatever it was from the URL
-        friendScoreEl.innerText = parseFloat(score).toFixed(2);
+        friendScoreEl.innerText = parseFloat(score);
     }
 }
 
@@ -210,68 +291,7 @@ function resetGuesses() {
 
     // reset the user score
     userScore = 0;
-    scoreEl.innerText = userScore.toFixed(2);
-}
-
-/**
- * Check the word frequency data for the user's guess and update the guess board 
- * and/or the score.
- * @param {Object[]} data 
- * @param {String} guess
- */
-function guessWord(data, guess) {
-    // add guess to guess array
-    userGuesses.push(guess);
-
-    // get the user's guess and find it was in the collocation corpus
-    const hit = data.find(x => x.assoc == guess);
-
-    // check if the table is full or not
-    const nextEmptyCell = [...board.querySelectorAll("td")].find(x => x.innerText == "");
-    if (nextEmptyCell)
-    {
-        if (hit)
-        {
-            // show the guess and the collocation frequency
-            nextEmptyCell.innerHTML = `
-                ${guess} <span style="float: right">${hit.freq}</span>
-            `;
-
-            // increase the score display
-            userScore += parseFloat(hit.freq);
-            scoreEl.innerText = userScore.toFixed(2);
-        }
-        else
-        {
-            // show the guess with an X next to it to show the user that the guess was incorrect
-            nextEmptyCell.innerHTML = `
-                ${guess} <span style="float: right">X</span>
-            `;
-        }
-
-        // if that was last guess
-        if (![...board.querySelectorAll("td")].find(x => x.innerText == ""))
-        {
-            // if playing against a friend, reveal their guesses
-            if (friendGuesses.length)
-            {
-                showFriendGuesses(data);
-            }
-
-            // if you beat your friend score, show confetti
-            if (userScore > friendScore)
-            {
-                const jsConfetti = new JSConfetti();
-
-                jsConfetti.addConfetti({
-                    emojis: ["🎉", "🏆"]
-                });
-            }
-        }
-    }
-
-    // clear the guess input
-    inputEl.value = "";
+    scoreEl.innerText = userScore;
 }
 
 /**
@@ -288,11 +308,11 @@ function showFriendGuesses(data) {
         // get the user guess for that table cell
         const guess = friendGuesses[i];
 
-        // show friend guesses and their frequency in the color blue
+        // show friend guesses and their mutal information in the color blue
         const hit = data.find(x => x.assoc == guess);
         if (hit)
         {
-            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">${hit.freq}</span>`;
+            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">${hit.info}</span>`;
         }
         else
         {

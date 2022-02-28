@@ -23,7 +23,7 @@ with open("collocations.txt", "r") as corpus:
 
         data[curr].append({
             "assoc": cols[3],
-             "freq": cols[6]
+            "info": cols[5]
         })
 
 with open("data.json", "w") as file:
