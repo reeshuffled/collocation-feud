@@ -22,13 +22,14 @@ button {
     width: 50%;
 }
 
-#board tr, #board td, #board th {
+#board tr, #board td {
     border: 1px solid black;
     padding: 1.5em;
 }
 
 #guessInput {
-    margin-top: 1em;
+    /* width: 100%; */
+    /* border: none; */
     font-size: 1em;
     padding: 0.5em;
 }

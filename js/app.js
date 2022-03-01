@@ -98,6 +98,7 @@ function guessWord(wordData, guess) {
 
     // check if the table is full or not
     const nextEmptyCell = [...board.querySelectorAll("td")].find(x => x.innerText == "");
+
     if (nextEmptyCell)
     {
         if (hit)
@@ -120,7 +121,7 @@ function guessWord(wordData, guess) {
         }
 
         // if that was last guess
-        if (![...board.querySelectorAll("td")].find(x => x.innerText == ""))
+        if ([...board.querySelectorAll("td")].find(x => x.innerText == "") == null)
         {
             // show the collocation infouencies
             showInformationStats(wordData);
@@ -141,25 +142,15 @@ function guessWord(wordData, guess) {
                 });
             }
         }
+        // otherwise, move the input
+        else
+        {
+           
+        }
     }
 
     // clear the guess input
     inputEl.value = "";
-}
-
-/**
- * Show the data about the mutual information of the word collocations.
- * @param {Object[]} wordData 
- */
-function showInformationStats(wordData) {
-    wordData
-        .sort((a, b) => b.info - a.info)
-        .forEach(x => {
-            const li = document.createElement("li");
-            li.innerText = `${x.assoc} - ${x.info}`;
-
-            infoStatsEl.appendChild(li);
-        });
 }
 
 /**
@@ -231,6 +222,69 @@ function selectRandomWord() {
 }
 
 /**
+ * Reset the guess board and user score.
+ */
+function resetGuesses() {
+    // clear the guesses table
+    [...board.querySelectorAll("td")]
+        .forEach(x => {
+            if (x.innerText)
+            {
+                x.innerText = "";
+            }
+        });
+
+    // clear the info stats list
+    infoStatsEl.innerHTML = "";
+
+    // reset the user score
+    userScore = 0;
+    scoreEl.innerText = userScore;
+}
+
+/**
+ * Show the guesses of the friend compared to the one's that the user has done.
+ * @param {Object} data 
+ */
+function showFriendGuesses() {
+    // get all table cells
+    const cells = [...board.querySelectorAll("td")];
+
+    // go through all friend guesses
+    for (let i = 0; i < friendGuesses.length; i++)
+    {
+        // get the user guess for that table cell
+        const guess = friendGuesses[i];
+
+        // show friend guesses and their mutal information in the color blue
+        const hit = data.find(x => x.assoc == guess);
+        if (hit)
+        {
+            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">${hit.info}</span>`;
+        }
+        else
+        {
+            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">X</span>`;
+        }
+    }
+}
+
+/**
+ * Show the data about the mutual information of the word collocations.
+ * @param {Object[]} wordData 
+ */
+function showInformationStats(wordData) {
+    wordData
+        .sort((a, b) => b.info - a.info)
+        .forEach(x => {
+            const li = document.createElement("li");
+            li.innerText = `${x.assoc} - ${x.info}`;
+
+            infoStatsEl.appendChild(li);
+        });
+}
+
+/**
  * Share the link to the word and user score.
  */
 function share() {
@@ -299,45 +353,6 @@ function updateSearchParam(param, value) {
     // use history API to not cause page reload on URL search parameter change
     const newRelativePathQuery = window.location.pathname + "?" + searchParams.toString();
     history.pushState(null, "", newRelativePathQuery);
-}
-
-/**
- * Reset the guess board and user score.
- */
-function resetGuesses() {
-    // clear the guesses table
-    [...board.querySelectorAll("td")].forEach(x => x.innerText = "");
-
-    // reset the user score
-    userScore = 0;
-    scoreEl.innerText = userScore;
-}
-
-/**
- * Show the guesses of the friend compared to the one's that the user has done.
- * @param {Object} data 
- */
-function showFriendGuesses() {
-    // get all table cells
-    const cells = [...board.querySelectorAll("td")];
-
-    // go through all friend guesses
-    for (let i = 0; i < friendGuesses.length; i++)
-    {
-        // get the user guess for that table cell
-        const guess = friendGuesses[i];
-
-        // show friend guesses and their mutal information in the color blue
-        const hit = data.find(x => x.assoc == guess);
-        if (hit)
-        {
-            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">${hit.info}</span>`;
-        }
-        else
-        {
-            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">X</span>`;
-        }
-    }
 }
 
 /**
