@@ -21,13 +21,17 @@ let friendScore;
 let userGuesses = [];
 let friendGuesses;
 
+// this variable is populated by the parseData() function
+const data = {};
+
 /**
  * Initalize the UI components of the game.
  */
 (async function initUI() {
-    // load the collocation data
-    const response = await fetch("data.json");
-    const data = await response.json();
+    // load and parse the collocation data
+    const response = await fetch("data.csv");
+    const text = await response.text();
+    parseData(text.split("\n").map(x => x.split(",")));
 
     // check if there are search parameters in the URL
     const queryString = window.location.search;
@@ -58,25 +62,25 @@ let friendGuesses;
         // if the word is a valid word, play it
         if (word && word in data)
         {
-            displayWord(data, word, friendScore);
+            displayWord(word, friendScore);
         }
         // otherwise display a random word
         else
         {
-            selectRandomWord(data);
+            selectRandomWord();
         }
     }
     // if there are none, jiust choose a random
     else
     {
         // select a random word when the data loads
-        selectRandomWord(data);
+        selectRandomWord();
     }
 
     // bind button click actions
     tryAgainBtn.onclick = resetGuesses;
     shareBtn.onclick = share;
-    newWordBtn.onclick = () => getNewWord(data);
+    newWordBtn.onclick = getNewWord;
 })();
 
 /**
@@ -85,12 +89,12 @@ let friendGuesses;
  * @param {Object[]} data 
  * @param {String} guess
  */
- function guessWord(data, guess) {
+function guessWord(wordData, guess) {
     // add guess to guess array
     userGuesses.push(guess);
 
     // get the user's guess and find it was in the collocation corpus
-    const hit = data.find(x => x.assoc == guess);
+    const hit = wordData.find(x => x.assoc == guess);
 
     // check if the table is full or not
     const nextEmptyCell = [...board.querySelectorAll("td")].find(x => x.innerText == "");
@@ -119,12 +123,12 @@ let friendGuesses;
         if (![...board.querySelectorAll("td")].find(x => x.innerText == ""))
         {
             // show the collocation infouencies
-            showInformationStats(data);
+            showInformationStats(wordData);
 
             // if playing against a friend, reveal their guesses
             if (friendGuesses && friendGuesses.length)
             {
-                showFriendGuesses(data);
+                showFriendGuesses();
             }
 
             // if you beat your friend score, show confetti
@@ -145,10 +149,10 @@ let friendGuesses;
 
 /**
  * Show the data about the mutual information of the word collocations.
- * @param {Object[]} data 
+ * @param {Object[]} wordData 
  */
-function showInformationStats(data) {
-    data
+function showInformationStats(wordData) {
+    wordData
         .sort((a, b) => b.info - a.info)
         .forEach(x => {
             const li = document.createElement("li");
@@ -160,9 +164,8 @@ function showInformationStats(data) {
 
 /**
  * Get a new word.
- * @param {Object} data 
  */
-function getNewWord(data) {
+function getNewWord() {
     // reset guesses
     resetGuesses();
 
@@ -184,7 +187,7 @@ function getNewWord(data) {
  * @param {String} word 
  * @param {Number} score 
  */
-function displayWord(data, word, score) {
+function displayWord(word, score) {
     // clear the board and score
     resetGuesses();
 
@@ -208,12 +211,11 @@ function displayWord(data, word, score) {
 
 /**
  * Select a random word from the dataset to show.
- * @param {Object[]} data 
  */
-function selectRandomWord(data) {
+function selectRandomWord() {
     // clear the board and score
     resetGuesses();
-    
+
     // get random word
     const key = Object.keys(data)[Math.floor(Math.random() * Object.keys(data).length)];
     
@@ -315,7 +317,7 @@ function resetGuesses() {
  * Show the guesses of the friend compared to the one's that the user has done.
  * @param {Object} data 
  */
-function showFriendGuesses(data) {
+function showFriendGuesses() {
     // get all table cells
     const cells = [...board.querySelectorAll("td")];
 
@@ -393,7 +395,7 @@ function decodeFriendGuesses(encodedGuesses) {
  * On input keydown, do the guess checking function for that word.
  * @param {Object[]} data 
  */
-function bindGuessChecker(data) {
+function bindGuessChecker(wordData) {
     inputEl.onkeydown = e => {
         // get the user guess from the input
         const guess = inputEl.value.trim().toLowerCase();
@@ -404,8 +406,37 @@ function bindGuessChecker(data) {
             // make sure that the input has characters in order to guess
             if (guess)
             {
-                guessWord(data, guess);
+                guessWord(wordData, guess);
             }
         }
+    }
+}
+
+/**
+ * Parse collocation data from sparse CSV into JS object.
+ * @param {Object[]} arr 
+ * @returns {Object} data
+ */
+function parseData(arr) {
+    let currentWord;
+
+    for (const entry of arr)
+    {
+        const [ word, assoc, info ] = entry;
+
+        if (word)
+        {
+            currentWord = word;
+        }
+
+        if (!data[currentWord])
+        {
+            data[currentWord] = [];
+        }
+        
+        data[currentWord].push({
+            assoc: assoc,
+            info: info
+        });
     }
 }
