@@ -171,6 +171,9 @@ function getNewWord(data) {
     updateSearchParam("score", "");
     friendScoreEl.parentNode.style.display = "none";
 
+    // reset friendGuesses
+    friendGuesses = [];
+
     // get new random word
     selectRandomWord(data);
 }
@@ -239,19 +242,33 @@ function share() {
     // if the user is in mobile, we can use the Share API
     if (navigator.share)
     {
+        // share message via Share API
         navigator.share({
             title: "Collocation Feud",
             text: `Play against me in Collocation Feud! The word is: ${currentWord}`,
             url: window.location.href
-        });
+        })
+        .then(() => {
+            // delete searchParams from URL
+            updateSearchParam("score", "");
+            updateSearchParam("guesses", "");
+        })
     }
     // otherwise, we will just copy to the clipboard
     else
     {
+        // build share message
         const text = `Play against me in Collocation Feud! The word is: ${currentWord}\n${window.location.href}`;
 
+        // copy text to clipboard
         navigator.clipboard.writeText(text)
-            .then(() => alert("Share URL copied to clipboard successfully!"));
+            .then(() => {
+                alert("Share URL copied to clipboard successfully!");
+
+                // delete searchParams from URL
+                updateSearchParam("score", "");
+                updateSearchParam("guesses", "");
+            });
     }
 }
 
@@ -379,7 +396,7 @@ function decodeFriendGuesses(encodedGuesses) {
 function bindGuessChecker(data) {
     inputEl.onkeydown = e => {
         // get the user guess from the input
-        const guess = inputEl.value.toLowerCase();
+        const guess = inputEl.value.trim().toLowerCase();
 
         // on enter keydown
         if (e.key == "Enter")
