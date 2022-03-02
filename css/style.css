@@ -2,9 +2,26 @@ html {
     font-family: sans-serif;
 }
 
+body {
+    margin: 0;
+}
+
 button {
     font-size: 1em;
     padding: 0.5em
+}
+
+#header {
+    border-bottom: 1px solid #d3d6da;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+#openInstructions {
+    position: absolute;
+    right: 5px;
+    text-decoration: underline;
 }
 
 .text-center {
@@ -16,6 +33,7 @@ button {
     margin-left: auto;
     margin-right: auto;
     border-collapse: collapse;
+    margin-top: 1em;
 }
 
 #board td {
@@ -40,3 +58,50 @@ button {
     font-size: 1em;
     padding: 0.5em;
 }
+
+#footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 1em;
+}
+
+/* From: https://www.w3schools.com/howto/howto_css_modals.asp */
+#instructionsModal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+  /* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }

@@ -9,16 +9,48 @@
     </head>
 
     <body>
+        <div id="instructionsModal">
+            <div class="modal-content">
+                <span class="close" onclick="closeInstructionsModal()">&times;</span>
+
+                <h1 class="text-center">Instructions</h1>
+
+                <p>
+                    Your goal in this game is to guess words that are associated with the word (usually appearing directly before/after it).
+                </p>
+
+                <p>
+                    You have ten guesses and you get points for the frequency value of the collocated word.
+                </p>
+
+                <p>
+                    You guess by typing into the text input box in one of the board cells and then pressing enter.
+                </p>
+
+                <p>
+                    An "X" next to your guess means that there was not enough frequency of that word collocation in the dataset. A number means that collocation was significant enough to be included in the dataset, and the number is the Mutual Information score (this is for nerds, what the number is does not matter for playing).
+                </p>
+
+                <p>
+                    If you press the "Share" button, it will share a link with the word, your score, and your guesses to send to someone else to play against them. The guesses are encoded so the person will not be able to cheat off of your guesses. They will be shown your score throughout the game and at the end of the game, your guesses will be revealed to them so that they can compare how you played vs how they played.
+                </p>
+
+                <p>
+                    The "Try Again" button will clear all your guesses for the current word and allow you to play again. The "Get New Word" button will give you a new word to guess for.
+                </p>
+            </div>
+        </div>
+
+        <section id="header">
+            <h1 style="margin: 0.5em;">Collocation Feud</h1>
+            <p id="openInstructions">How to Play</p>
+        </section>
+
         <section class="text-center">
-            <h1 id="word">Your word is...</h1>
+            <h1 id="word">Your word is loading, please wait...</h1>
 
             <h3 style="margin-bottom: 0;">Your Score: <span id="score">0</span></h3>
             <h3 style="margin-top: 5px; display: none;">Your Friend's Score: <span id="friendScore">0</span></h3>
-
-            <p>
-                Your goal in this game is to guess words that are associated with the word (usually appearing directly before/after it).<br>
-                You have ten guesses and you get points for the frequency value of the collocated word.
-            </p>
 
             <table id="board">
                 <tr>
@@ -52,6 +84,10 @@
             </p>
 
             <ol style="list-style-position: inside" id="info_stats"></ol>
+        </section>
+
+        <section id="footer">
+            <span>Created By: Rees Draminski, Data From: <a href="https://collocates.info">Collocates</a></span>
         </section>
        
         <!-- from: https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js -->

@@ -3,6 +3,8 @@ const wordEl = document.getElementById("word");
 const inputEl = document.getElementById("guessInput");
 const boardEl = document.getElementById("board");
 const infoStatsEl = document.getElementById("info_stats");
+const openInstructionsEl = document.getElementById("openInstructions");
+const modal = document.getElementById("instructionsModal");
 
 const friendScoreEl = document.getElementById("friendScore");
 const scoreEl = document.getElementById("score");
@@ -84,6 +86,7 @@ const data = {};
     tryAgainBtn.onclick = resetGuesses;
     shareBtn.onclick = share;
     newWordBtn.onclick = getNewWord;
+    openInstructions.onclick = openInstructionsModal;
 })();
 
 /**
@@ -342,6 +345,14 @@ function share() {
                 updateSearchParam("guesses", "");
             });
     }
+}
+
+function openInstructionsModal() {
+    modal.style.display = "block";
+}
+
+function closeInstructionsModal() {
+    modal.style.display = "none";
 }
 
 /**
