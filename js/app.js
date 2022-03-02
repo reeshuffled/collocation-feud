@@ -11,6 +11,9 @@ const tryAgainBtn = document.getElementById("tryAgain");
 const shareBtn = document.getElementById("share");
 const newWordBtn = document.getElementById("newWord");
 
+const guessBoardCells = [...board.querySelectorAll("td")];
+let currentCellIndex = 0;
+
 // the shift amount that is used for the Ceaeser Cipher to encode user guesses
 const SHIFT = 5;
 
@@ -90,22 +93,33 @@ const data = {};
  * @param {String} guess
  */
 function guessWord(wordData, guess) {
-    // add guess to guess array
-    userGuesses.push(guess);
-
-    // get the user's guess and find it was in the collocation corpus
-    const hit = wordData.find(x => x.assoc == guess);
-
-    // check if the table is full or not
-    const nextEmptyCell = [...board.querySelectorAll("td")].find(x => x.innerText == "");
-
-    if (nextEmptyCell)
+    // if there are still guesses left
+    if (currentCellIndex < guessBoardCells.length)
     {
+        // add guess to guess array
+        userGuesses.push(guess);
+
+        // get the user's guess and find it was in the collocation corpus
+        const hit = wordData.find(x => x.assoc == guess);
+
+        // check if the table is full or not
+        const currentCell = guessBoardCells[currentCellIndex];
+        const nextCell = currentCell + 1 != guessBoardCells.length - 1 ? guessBoardCells[currentCellIndex + 1] : null;
+        currentCellIndex++;
+
+        // if there is a next cell, move the guess input to that cell
+        if (nextCell) 
+        {
+            nextCell.appendChild(currentCell.removeChild(inputEl));
+            inputEl.focus();
+        }
+
+        // if the guess word is in the assoications array
         if (hit)
         {
             // show the guess and the collocation mutal information
-            nextEmptyCell.innerHTML = `
-                ${guess} <span style="float: right">${hit.info}</span>
+            currentCell.innerHTML = `
+                <p>${guess} <span style="float: right">${hit.info}</span></p>
             `;
 
             // increase the score display
@@ -115,37 +129,30 @@ function guessWord(wordData, guess) {
         else
         {
             // show the guess with an X next to it to show the user that the guess was incorrect
-            nextEmptyCell.innerHTML = `
-                ${guess} <span style="float: right">X</span>
+            currentCell.innerHTML = `
+                <p>${guess} <span style="float: right">X</span></p>
             `;
         }
 
-        // if that was last guess
-        if ([...board.querySelectorAll("td")].find(x => x.innerText == "") == null)
+        // if there is no next cell, then we have no more guesses, and the game is over
+        if (!nextCell) 
         {
-            // show the collocation infouencies
+            // show the collocation information stats
             showInformationStats(wordData);
 
             // if playing against a friend, reveal their guesses
-            if (friendGuesses && friendGuesses.length)
+            if (friendGuesses && friendGuesses.length) 
             {
                 showFriendGuesses();
             }
 
             // if you beat your friend score, show confetti
-            if (userScore > friendScore)
+            if (userScore > friendScore) 
             {
-                const jsConfetti = new JSConfetti();
-
-                jsConfetti.addConfetti({
+                new JSConfetti().addConfetti({
                     emojis: ["🎉", "🏆"]
                 });
             }
-        }
-        // otherwise, move the input
-        else
-        {
-           
         }
     }
 
@@ -226,7 +233,7 @@ function selectRandomWord() {
  */
 function resetGuesses() {
     // clear the guesses table
-    [...board.querySelectorAll("td")]
+    guessBoardCells
         .forEach(x => {
             if (x.innerText)
             {
@@ -234,8 +241,17 @@ function resetGuesses() {
             }
         });
 
+    // reset current cell to first cell
+    currentCellIndex = 0;
+
+    // move the inputEl
+    guessBoardCells[currentCellIndex].appendChild(inputEl);
+
     // clear the info stats list
     infoStatsEl.innerHTML = "";
+
+    // focus on input el
+    inputEl.focus();
 
     // reset the user score
     userScore = 0;
@@ -411,6 +427,10 @@ function decodeFriendGuesses(encodedGuesses) {
  * @param {Object[]} data 
  */
 function bindGuessChecker(wordData) {
+    // focus on input el
+    inputEl.focus();
+
+    // attach key listener
     inputEl.onkeydown = e => {
         // get the user guess from the input
         const guess = inputEl.value.trim().toLowerCase();

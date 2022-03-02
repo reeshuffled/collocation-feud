@@ -22,7 +22,9 @@
 
             <table id="board">
                 <tr>
-                    <td></td>
+                    <td>
+                        <input id="guessInput" type="text" placeholder="Enter your guess" autofocus autocomplete="off">
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
@@ -43,18 +45,17 @@
                 </tr>
             </table>
 
-            <ol style="list-style-position: inside" id="info_stats"></ol>
-
-            <input id="guessInput" type="text" placeholder="Enter your guess" autofocus>
-
             <p>
                 <button id="tryAgain">Try Again</button>
                 <button id="share">Share</button>
                 <button id="newWord">Get New Word</button>
             </p>
+
+            <ol style="list-style-position: inside" id="info_stats"></ol>
         </section>
        
-        <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+        <!-- from: https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js -->
+        <script src="js/confetti.js"></script>
         <script src="js/app.js"></script>
     </body>
 </html>
