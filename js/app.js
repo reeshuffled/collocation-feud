@@ -146,7 +146,7 @@ function guessWord(wordData, guess) {
             // if playing against a friend, reveal their guesses
             if (friendGuesses && friendGuesses.length) 
             {
-                showFriendGuesses();
+                showFriendGuesses(wordData);
             }
 
             // if you beat your friend score, show confetti
@@ -265,7 +265,7 @@ function resetGuesses() {
  * Show the guesses of the friend compared to the one's that the user has done.
  * @param {Object} data 
  */
-function showFriendGuesses() {
+function showFriendGuesses(wordData) {
     // get all table cells
     const cells = [...board.querySelectorAll("td")];
 
@@ -276,7 +276,7 @@ function showFriendGuesses() {
         const guess = friendGuesses[i];
 
         // show friend guesses and their mutal information in the color blue
-        const hit = data.find(x => x.assoc == guess);
+        const hit = wordData.find(x => x.assoc == guess);
         if (hit)
         {
             cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">${hit.info}</span>`;
