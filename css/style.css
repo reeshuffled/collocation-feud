@@ -24,6 +24,10 @@ button {
     text-decoration: underline;
 }
 
+#openInstructions:hover {
+    cursor: pointer;
+}
+
 .text-center {
     text-align: center;
 }
@@ -82,7 +86,6 @@ button {
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-/* Modal Content */
 .modal-content {
     background-color: #fefefe;
     margin: auto;
@@ -91,17 +94,15 @@ button {
     width: 80%;
 }
 
-  /* The Close Button */
 .close {
     color: #aaaaaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-  }
+}
   
-  .close:hover,
-  .close:focus {
+.close:hover, .close:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
-  }
+}

@@ -33,6 +33,13 @@ const data = {};
  * Initalize the UI components of the game.
  */
 (async function initUI() {
+    // show instructions modal on first site open
+    if (!localStorage.getItem("visitedPreviously"))
+    {
+        openInstructionsModal();
+        localStorage.setItem("visitedPreviously", true);
+    }
+
     // load and parse the collocation data
     const response = await fetch("data.csv");
     const text = await response.text();
@@ -86,7 +93,7 @@ const data = {};
     tryAgainBtn.onclick = resetGuesses;
     shareBtn.onclick = share;
     newWordBtn.onclick = getNewWord;
-    openInstructions.onclick = openInstructionsModal;
+    openInstructionsEl.onclick = openInstructionsModal;
 })();
 
 /**
@@ -279,11 +286,11 @@ function showFriendGuesses(wordData) {
         const hit = wordData.find(x => x.assoc == guess);
         if (hit)
         {
-            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">${hit.info}</span>`;
+            cells[i].innerHTML += `<p><span style="color: blue">${guess}</span><span style="float: right">${hit.info}</span></p>`;
         }
         else
         {
-            cells[i].innerHTML += `<br><span style="color: blue">${guess}</span><span style="float: right">X</span>`;
+            cells[i].innerHTML += `<p><span style="color: blue">${guess}</span><span style="float: right">X</span></p>`;
         }
     }
 }
