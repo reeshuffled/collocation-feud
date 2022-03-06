@@ -68,7 +68,7 @@ const data = {};
         // if the score is a number, store it under friendScore
         if (!isNaN(score))
         {
-            friendScore = parseFloat(score);
+            friendScore = parseInt(score, 10);
         }
 
         // if the word is a valid word, play it
@@ -133,8 +133,8 @@ function guessWord(wordData, guess) {
             `;
 
             // increase the score display
-            userScore += parseFloat(hit.info);
-            scoreEl.innerText = userScore;
+            userScore += parseInt(hit.info, 10);
+            scoreEl.innerText = numberWithCommas(userScore);
         }
         else
         {
@@ -213,7 +213,7 @@ function displayWord(word, score) {
         friendScoreEl.parentNode.style.display = "";
 
         // set friend score to whatever it was from the URL
-        friendScoreEl.innerText = parseFloat(score);
+        friendScoreEl.innerText = numberWithCommas(score);
     }
 }
 
@@ -417,6 +417,7 @@ function encodeUserGuesses(decodedGuesses) {
 
 /**
  * Decode the encoded user guesses.
+ * From: http://www.code2succeed.com/caesar-decryption-of-string-using-javascript/
  * @param {String} encodedGuesses 
  * @returns {String[]} decodedGuesses
  */
@@ -429,7 +430,7 @@ function decodeFriendGuesses(encodedGuesses) {
                     // if is letter, shift by amount
                     if (letter.match(/[a-z]/i))
                     {
-                        return String.fromCharCode(((letter.charCodeAt(0) - 97 - SHIFT) % 26) + 97)
+                        return String.fromCharCode(((letter.charCodeAt(0) - 97 - SHIFT + 26) % 26) + 97)
                     }
                     // otherwise, leave it be
                     else
@@ -492,4 +493,13 @@ function parseData(arr) {
             info: info
         });
     }
+}
+
+/**
+ * From: https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+ * @param {Number} x 
+ * @returns {String}
+ */
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
