@@ -16,6 +16,8 @@ const newWordBtn = document.getElementById("newWord");
 const guessBoardCells = [...board.querySelectorAll("td")];
 let currentCellIndex = 0;
 
+const ALPHABET = "abcdefghijklmnopqrstuvwxyz";
+
 // the shift amount that is used for the Ceaeser Cipher to encode user guesses
 const SHIFT = 5;
 
@@ -40,10 +42,8 @@ const data = {};
         localStorage.setItem("visitedPreviously", true);
     }
 
-    // load and parse the collocation data
-    const response = await fetch("data.csv");
-    const text = await response.text();
-    parseData(text.split("\n").map(x => x.split(",")));
+    // load
+    await loadData();
 
     // check if there are search parameters in the URL
     const queryString = window.location.search;
@@ -95,6 +95,28 @@ const data = {};
     newWordBtn.onclick = getNewWord;
     openInstructionsEl.onclick = openInstructionsModal;
 })();
+
+/**
+ * Load all the collocation data in the background.
+ */
+async function loadData() {
+    // get a random letter to start out with
+    const randomLetter = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+    const remainingLetters = ALPHABET.replace(randomLetter, "");
+
+    // load the data of the random letter synchronously to get a word to start
+    const response = await fetch(`data/${randomLetter}.csv`);
+    const text = await response.text();
+    parseData(text.split("\n").map(x => x.split(",")));
+
+    // load the remaining letter data asynchronously
+    remainingLetters.split("")
+        .forEach(letter => {
+            fetch(`data/${letter}.csv`)
+                .then(response => response.text())
+                .then(text => parseData(text.split("\n").map(x => x.split(","))));
+        });
+}
 
 /**
  * Check the word mutal information data for the user's guess and update the guess board 
